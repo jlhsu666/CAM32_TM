@@ -164,16 +164,53 @@ static esp_err_t stream_handler(httpd_req *req)
             }
         }
 
-    if(res == ESP_OK){
-        res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
-    }
+        if(res == ESP_OK){
+            res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
+        }
 
-    if(res == ESP_OK){
-        res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
-    }
+        if(res == ESP_OK){
+            res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
+        }
 
-    }
+        if(res == ESP_OK){
+            size_t hlen = snprintf((char *)part_buf, 64, _STREAM_PART, _jpg_buf_len);
+            res =httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
+        }
 
+        if(fb) {
+            esp_camera_fb_return(fb);
+            fb = NULL;
+            _jpg_buf = NULL;
+        } else if (_jpg_buf){
+            free(_jpg_buf);
+            _jpg_buf=NULL;
+        }
+
+        if(res != ESP_OK){
+            break;
+        }
+    }
+    return res;
+}
+
+static esp_err_t status_handler(httpd_req_t *req)
+{
+    static char json_response[1024];
+    sensor_t *s = esp_camera_sensor_get();
+    char *p = json_response;
+    *p++= '{';
+    p+=sprintf(p,"\"flash\":%d,", 0);
+    p+=sprintf(p,"\"framesize\":%u,", s->status.framesize);
+    p+=sprintf(p,"\"quality\":%u,", s->status.quality);
+    p+=sprintf(p,"\"brightness\":%d,", s->status.brightness);
+    p+=sprintf(p,"\"contrast\":%d,", s->status.contrast);
+    p+=sprintf(p,"\"hmirror\":%u,", s->status.hmirror);
+    p+=sprintf(p,"\"vflip\":%u",s->status.vflip);
+    *p++ ='}';
+    *p++ =0;
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    return httpd_resp_send(req, json_response, strlen(json_response));
 }
 
 void startCameraServer()
