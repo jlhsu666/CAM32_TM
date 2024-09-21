@@ -88,6 +88,94 @@ void initCamera()
   }
 }
 
+static size_t jpg_encode_stream(void *arg, size_t index, const void* data, size_t len){
+    jpg_chunking_t *j = (jpg_chunking_t *)arg;
+    if(!index){
+        j->len=0;
+    }
+    if(httpd_resp_send_chunk(j->req, (const char *)data, len) != ESP_OK) {
+        return 0;
+    }
+    j->len += len;
+    return len;
+}
+
+static esp_err_t capture_handler(httpd_req_t *req)
+{
+    camera_fb_t *fb = NULL;
+    esp_err_t res = ESP_OK;
+
+    fb=esp_camera_fb_get();
+    if(!fb){
+        Serial.println("Camera capture failed!");
+        httpd_resp_send_500(req);
+        return ESP_FAIL;
+    }
+    
+    httpd_resp_set_type(req, "image/jpeg");
+    httpd_resp_set_hdr(req, "Content_Disposition", "inline; filename=capture.jpg");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+
+    size_t fb_len = 0;
+    if(fb->format == PIXFORMAT_JPEG){
+        fb_len = fb->len;
+        res = httpd_resp_send(req, (const char *) fb->buf,fb->len);
+    } else {
+        jpg_chunking_t jchunk = {req, 0};
+        res = frame2jpg_cb(fb, 80, jpg_encode_stream, &jchunk)?ESP_OK:ESP_FAIL;
+        httpd_resp_send_chunk(req, NULL, 0);
+        fb_len=jchunk.len;
+    }
+    esp_camera_fb_return(fb);
+    return res;
+}
+
+static esp_err_t stream_handler(httpd_req *req)
+{
+    camera_fb_t *fb = NULL;
+    esp_err_t res = ESP_OK;
+    size_t _jpg_buf_len = 0;
+    uint8_t *_jpg_buf = NULL;
+    char *part_buf[64];
+
+    res=httpd_resp_set_type(req, _STREAM_CONTENT_TYPE);
+    if(res !=ESP_OK){
+        return res;
+    }
+
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin","*");
+    while(true){
+        fb = esp_camera_fb_get();
+        if(!fb) {
+            Serial.println("Camera capture failed!");
+            res = ESP_FAIL; 
+        } else {
+            if(fb->format != PIXFORMAT_JPEG){
+                bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
+                esp_camera_fb_return(fb);
+                fb = NULL;
+                if(!jpeg_converted){
+                    Serial.println("JPEG compression failed");
+                    res =ESP_FAIL;
+                }
+            } else {
+                _jpg_buf_len = fb->len;
+                _jpg_buf= fb->buf;
+            }
+        }
+
+    if(res == ESP_OK){
+        res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
+    }
+
+    if(res == ESP_OK){
+        res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
+    }
+
+    }
+
+}
+
 void startCameraServer()
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
