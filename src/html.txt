@@ -1,0 +1,105 @@
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Access-Control-Allow-Headers" content="Origin, X_Requested-With, Content-Type, Accept">
+  <title>Camera 32 & Teachable Machine</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+</head> 
+<body>
+  <section class="main">
+  <figure>
+    <div id="stream-container" class="image-container hidden">
+      <div class="close" id="close-stream" style="display:none">x</div>
+      <img id="stream" src="" style="display:none" crossorigin="anonymous">
+      <canvas id="canvas" width="0", hegiht="0"></canvas>
+    </div>  
+  </figure>
+  <section id="buttons">
+    <table>
+      <tr>
+        <td><button id="restart" onclick="try{fetch(document.location.origin+'/control?restart');}catch(e){}">Restart</button></td>
+        <td><button id="get-still" style="display:none">Get Still</button></td>
+        <td><button id="toggle-stream" style="display:none"></button></td>
+      </tr>
+    </table>
+  </section>  
+  <div id="logo">
+    <label for="nav-toggle-cb" id="nav-toggle">Toggle Settings</label>
+  </div>  
+  <div id="content">
+    <div id="sidebar">
+      <input type="checkbox" id="nav-toggle-cb">
+      <nav id="menu">
+        <div class="input-group">
+          <label for="kind">Kind</label>
+          <select id="kind">
+            <option value="image">image</option>
+            <option value="pose">pose</option>
+          </select>
+        </div> 
+        <div class="input-group">
+          <label for="modelPath">Model Path</label>
+          <input type="text" id="modelPath" value="">
+        </div> 
+        <div class="input-group">
+          <label for="btnModel"></label>
+          <button type="button" id="btnModel" onclick="LoadModel();">Start Recognition
+        </div>
+        <div class="input-group" id="flash-group">
+          <label for="flash">Flash</label>
+          <div class="range-min">0</div>
+          <input type="range" id="flash" min="0" max="255" value="0" class="default-action">
+          <div class="range-max">255</div>
+        </div>
+        <div class="input-group" id="framesize-group">
+          <label for="framesize">Resolution</label>
+          <select id="framesize" class="default-action">
+            <option value="10">UXGA(1600*1200)</option>
+            <option value="9">SXGA(1280*1024)</option>
+            <option value="8">XGA(1024*768)</option>
+            <option value="7">SVGA(800*600)</option>
+            <option value="6">VGA(640*480)</option>
+            <option value="5" selected="selected">CIF(400*296)</option>
+            <option value="4">QVGA(320*240)</option>
+            <option value="3">HQVGA(240*176)</option>
+            <option value="0">QQVGA(160*120)</option>
+          </select>
+        </div>
+        <div class="input-group" id="quality-group">
+          <label for="quality">Quality</label>
+          <div class="range-min">10</div>
+          <input type="range" id="quality" min="10" max="63" value="10" class="default-action">
+          <div class="range-max">63</div>
+        </div>  
+          
+        <div class="input-group">
+          <label>Brightness</label>
+          <div class="range-min"></div>
+          <input type="range">
+          <div class="range-max"></div>
+        </div>  
+          
+        <div class="input-group">
+          <label>Contrast</label>
+          <div class="range-min"></div>
+          <input type="range">
+          <div class="range-max"></div>
+        </div>  
+          
+        <div class="input-group">
+          <label>HMirror</label>
+          <div class="range-min"></div>
+          <input type="range">
+          <div class="range-max"></div>
+        </div>      
+
+        <div class="input-group">
+          <label>VFlip</label>
+          <div class="range-min"></div>
+          <input type="range">
+          <div class="range-max"></div>
+        </div>   
+          
+  </div>  
+</body>
