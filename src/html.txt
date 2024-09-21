@@ -73,33 +73,36 @@
           <div class="range-max">63</div>
         </div>  
           
-        <div class="input-group">
-          <label>Brightness</label>
-          <div class="range-min"></div>
-          <input type="range">
-          <div class="range-max"></div>
+        <div class="input-group" id="brightness-group">
+          <label for="brightness">Brightness</label>
+          <div class="range-min">-2</div>
+          <input type="range" id="brightness" min="-2" max="2" value="0" class="default-action">
+          <div class="range-max">2</div>
         </div>  
           
-        <div class="input-group">
-          <label>Contrast</label>
-          <div class="range-min"></div>
-          <input type="range">
-          <div class="range-max"></div>
+        <div class="input-group" id="contrast-group">
+          <label for="contrast">Contrast</label>
+          <div class="range-min">-2</div>
+          <input type="range" id="contrast" min="-2" max="2" value="0" class="default-action">
+          <div class="range-max">2</div>
         </div>  
           
-        <div class="input-group">
-          <label>HMirror</label>
-          <div class="range-min"></div>
-          <input type="range">
-          <div class="range-max"></div>
+        <div class="input-group" id="mirror-group">
+          <label for="hmirror">HMirror</label>
+          <div class="switch">
+            <input type="checkbox" id="hmirror" class="default-action" checked="checked">
+            <label class="slider" for="hmirror"></label>
+          </div>
         </div>      
 
-        <div class="input-group">
-          <label>VFlip</label>
-          <div class="range-min"></div>
-          <input type="range">
-          <div class="range-max"></div>
-        </div>   
-          
-  </div>  
+        <div class="input-group" id="vflip-group">
+          <label for="vflip">VFlip</label>
+          <div class="switch">
+            <input type="checkbox" id="vflip" class="default-action" checked="checked">
+            <label class="slider" for="vflip"></label>
+          </div>
+        </div>           
+     </div> 
+   </div>  
+ </section>     
 </body>
