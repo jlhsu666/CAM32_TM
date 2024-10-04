@@ -245,7 +245,6 @@ void getCommand(char c)
         if((cmdState==0)&&(strState==2) &&(c!=';')) P6=P6+String(c);
         if((cmdState==0)&&(strState==2) &&(c!=';')) P7=P7+String(c);
         
-
     }
 }
 
@@ -285,10 +284,61 @@ static esp_err_t cmd_handler(httpd_req_t *req)
         {
             getCommand(char(myCmd.charAt(i)));
         }
+        if (Feedback=="") Feedback=Command;
+        const char *resp = Feedback.c_str();
+        httpd_resp_set_type(req, "text/html");
+        httpd_resp_set_hdr(req, "Access-Control-Allow_Origin", "*");
+        return httpd_resp_send(req, resp, strlen(resp));  
     }
+    else{
+        int val=atoi(value);
+        sensor_t *s = esp_camera_sensor_get();
+        int res=0;
 
+        if(!strcmp(variable, "framesize")) {
+           if(s->pixformat == PIXFORMAT_JPEG)
+                res= s->set_framesize(s, (framesize_t)val); 
+        }
+        else if(!strcmp(variable, "quality")) res=s->set_quality(s,val);
+        else if(!strcmp(variable, "brightness")) res=s->set_brightness(s,val);
+        else if(!strcmp(variable, "contrast")) res=s->set_contrast(s,val);
+        else if(!strcmp(variable, "hmirror")) res=s->set_hmirror(s,val);
+        else if(!strcmp(variable, "vflip")) res=s->set_vflip(s,val);
+        else if(!strcmp(variable, "flash")) {
+            ledcAttachPin(4,4);
+            ledcSetup(4,5000,8);
+            ledcWrite(4, val);
+        }
+        else {
+            res = -1;
+        }
+        if(res){
+            return httpd_resp_send_500(req);
+        }
+        if(buf){
+            Feedback=String(buf);
+            const char *resp = Feedback.c_str();
+            httpd_resp_set_type(req, "text/html");
+            httpd_resp_set_hdr(req, "Access-Control-Allow_Origin", "*");
+            return httpd_resp_send(req, resp, strlen(resp));          
+        }
+        else{
+            httpd_resp_set_hdr(req, "Access-Control-Allow_Origin", "*");
+            return httpd_resp_send(req, NULL, 0);
+        }
+    }
 }
 
+static const char PROGMEM INDEX_HTML[] = R"rawliteral(<!doctype html>
+<html>
+
+</html>)rawliteral";
+
+static esp_err_t index_handler(httpd_req *req)
+{
+    httpd_resp_set_type(req, "text/html");
+    return httpd_resp_send(req, (const char*)INDEX_HTML, strlen(INDEX_HTML));
+}
 
 void startCameraServer()
 {
@@ -372,7 +422,7 @@ void setup()
         }
 
         if(WiFi.status() == WL_CONNECTED){
-            WiFi.softAP(WiFi.localIP().toString()+"_"+(String)apssid.c_str(),appassword);
+            WiFi.softAP(WiFi.localIP().toString()+"_"+String(apssid),appassword);
             Serial.println("");
             Serial.println("STAIP address: ");
             Serial.println(WiFi.localIP());
