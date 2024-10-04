@@ -15,6 +15,20 @@ const char* appassword = "12345678";
 String Feedback="";
 String Command="";
 String cmd="";
+byte ReceiveState=0;
+byte cmdState=1;
+byte strState=1;
+byte questionState=0;
+byte equalState=0;
+
+String P1="";
+String P2="";
+String P3="";
+String P4="";
+String P5="";
+String P6="";
+String P7="";
+
 
 typedef struct {
     httpd_req_t *req;
@@ -212,6 +226,69 @@ static esp_err_t status_handler(httpd_req_t *req)
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
     return httpd_resp_send(req, json_response, strlen(json_response));
 }
+
+void getCommand(char c)
+{
+    if(c=='?') ReceiveState=1;
+    if((c==' ')||(c=='\r')||(c=='\n')) ReceiveState=0;
+
+    if (ReceiveState==1){
+        Command=Command+String(c);
+        if(c=='=') cmdState=0;
+        if(c==';') strState++;
+        if((cmdState==1)&&((c!='?')||(questionState==1))) cmd=cmd+String(c);
+        if((cmdState==0)&&(strState==1) &&((c!='=')||(equalState==1))) P1=P1+String(c);
+        if((cmdState==0)&&(strState==2) &&(c!=';')) P2=P2+String(c);
+        if((cmdState==0)&&(strState==2) &&(c!=';')) P3=P3+String(c);
+        if((cmdState==0)&&(strState==2) &&(c!=';')) P4=P4+String(c);
+        if((cmdState==0)&&(strState==2) &&(c!=';')) P5=P5+String(c);
+        if((cmdState==0)&&(strState==2) &&(c!=';')) P6=P6+String(c);
+        if((cmdState==0)&&(strState==2) &&(c!=';')) P7=P7+String(c);
+        
+
+    }
+}
+
+static esp_err_t cmd_handler(httpd_req_t *req)
+{
+    char *buf;
+    size_t buf_len;
+    char variable[128]={0,};
+    char value[128]={0,};
+    String myCmd = "";
+
+    buf_len = httpd_req_get_url_query_len(req)+1;
+    if(buf_len >1){
+        buf=(char*)malloc(buf_len);
+        if(!buf){
+            httpd_resp_send_500(req);
+            return ESP_FAIL;
+        }
+        if(httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK){
+            if(httpd_query_key_value(buf,"var",variable,sizeof(variable)) == ESP_OK && 
+               httpd_query_key_value(buf,"val", value, sizeof(value))==ESP_OK){}
+            else{
+               myCmd=String(buf); 
+            }
+        }
+        free(buf);
+    }
+    else{
+        httpd_resp_send_404(req);
+        return ESP_FAIL;
+    }
+
+    Feedback="";Command="";cmd="";
+    if(myCmd.length()>0){
+        myCmd="?"+myCmd;
+        for(int i=0;i<myCmd.length();i++)
+        {
+            getCommand(char(myCmd.charAt(i)));
+        }
+    }
+
+}
+
 
 void startCameraServer()
 {
