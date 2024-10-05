@@ -6,8 +6,8 @@
 #include "esp_http_server.h"
 #include "img_converters.h"
 
-const char* ssid = "Ron";
-const char* password = "0963083131";
+const char* ssid = "";
+const char* password = "";
 
 const char* apssid = "ESP32-Ron";
 const char* appassword = "12345678";
