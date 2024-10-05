@@ -336,33 +336,35 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(<!doctype html>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Access-Control-Allow-Headers" content="Origin, X_Requested-With, Content-Type, Accept">
     <title>Camera 32 & Teachable Machine</title>
+    <script src="https:\/\/ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     <script src="https:\/\/cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https:\/\/cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <style>
         body { font-family: Arial, Helvetica, sans-serif; background: #181818; color: #efefef; font-size: 16px; } h2 { font-size: 18px; } section.main { display: flex; } #menu, section.main { flex-direction: column; } #menu { display: flex; flex-wrap: nowrap; min-width: 340px; background: #363636; padding: 8px; border-radius: 4px; margin-top: -10px; margin-right: 10px; } #content { display: flex; flex-wrap: wrap; align-items: stretch; } figure { padding: 0; margin: 0; -webkit-margin-before: 0; margin-block-start: 0; -webkit-margin-after: 0; margin-block-end: 0; -webkit-margin-start: 0; margin-inline-start: 0; -webkit-margin-end: 0; margin-inline-end: 0; } figure img { display: block; width: 100%; height: auto; border-radius: 4px; margin-top: 8px; } @media (min-width: 800px) and (orientation: landscape) { #content { display: flex; flex-wrap: nowrap; align-items: stretch; } figure img { display: block; max-width: 100%; max-height: calc(100vh - 40px); width: auto; height: auto; } figure { padding: 0; margin: 0; -webkit-margin-before: 0; margin-block-start: 0; -webkit-margin-after: 0; margin-block-end: 0; -webkit-margin-start: 0; margin-inline-start: 0; -webkit-margin-end: 0; margin-inline-end: 0; } } section#buttons { display: flex; flex-wrap: nowrap; justify-content: space-between; } #nav-toggle { cursor: pointer; display: block; } #nav-toggle-cb { outline: 0; opacity: 0; width: 0; height: 0; } #nav-toggle-cb:checked + #menu { display: none; } .input-group { display: flex; flex-wrap: nowrap; line-height: 22px; margin: 5px 0; } .input-group > label { display: inline-block; padding-right: 10px; min-width: 47%; } .input-group input, .input-group select { flex-grow: 1; } .range-max, .range-min { display: inline-block; padding: 0 5px; } button { display: block; margin: 5px; padding: 0 12px; border: 0; line-height: 28px; cursor: pointer; color: #fff; background: #ff3034; border-radius: 5px; font-size: 16px; outline: 0; } button:hover { background: #ff494d; } button:active { background: #f21c21; } button.disabled { cursor: default; background: #a0a0a0; } input[type="range"] { -webkit-appearance: none; width: 100%; height: 22px; background: #363636; cursor: pointer; margin: 0; } input[type="range"]:focus { outline: 0; } input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 2px; cursor: pointer; background: #efefef; border-radius: 0; border: 0 solid #efefef; } input[type="range"]::-webkit-slider-thumb { border: 1px solid rgba(0, 0, 30, 0); height: 22px; width: 22px; border-radius: 50px; background: #ff3034; cursor: pointer; -webkit-appearance: none; margin-top: -11.5px; } input[type="range"]:focus::-webkit-slider-runnable-track { background: #efefef; } input[type="range"]::-moz-range-track { width: 100%; height: 2px; cursor: pointer; background: #efefef; border-radius: 0; border: 0 solid #efefef; } input[type="range"]::-moz-range-thumb { border: 1px solid rgba(0, 0, 30, 0); height: 22px; width: 22px; border-radius: 50px; background: #ff3034; cursor: pointer; } input[type="range"]::-ms-track { width: 100%; height: 2px; cursor: pointer; background: 0 0; border-color: transparent; color: transparent; } input[type="range"]::-ms-fill-lower { background: #efefef; border: 0 solid #efefef; border-radius: 0; } input[type="range"]::-ms-fill-upper { background: #efefef; border: 0 solid #efefef; border-radius: 0; } input[type="range"]::-ms-thumb { border: 1px solid rgba(0, 0, 30, 0); height: 22px; width: 22px; border-radius: 50px; background: #ff3034; cursor: pointer; height: 2px; } input[type="range"]:focus::-ms-fill-lower { background: #efefef; } input[type="range"]:focus::-ms-fill-upper { background: #363636; } .switch { display: block; position: relative; line-height: 22px; font-size: 16px; height: 22px; } .switch input { outline: 0; opacity: 0; width: 0; height: 0; } .slider { width: 50px; height: 22px; border-radius: 22px; cursor: pointer; background-color: grey; } .slider, .slider:before { display: inline-block; transition: 0.4s; } .slider:before { position: relative; content: ""; border-radius: 50%; height: 16px; width: 16px; left: 4px; top: 3px; background-color: #fff; } input:checked + .slider { background-color: #ff3034; } input:checked + .slider:before { -webkit-transform: translateX(26px); transform: translateX(26px); } select { border: 1px solid #363636; font-size: 14px; height: 22px; outline: 0; border-radius: 5px; } .image-container { position: relative; min-width: 160px; } .close { position: absolute; right: 5px; top: 5px; background: #ff3034; width: 16px; height: 16px; border-radius: 100px; color: #fff; text-align: center; line-height: 18px; cursor: pointer; } .hidden { display: none; }
     </style>
 </head> 
-  <body>
-    <section class="main">
+<body>
+  <section class="main">
     <figure>
       <div id="stream-container" class="image-container hidden">
         <div class="close" id="close-stream" style="display:none">x</div>
         <img id="stream" src="" style="display:none" crossorigin="anonymous">
-        <canvas id="canvas" width="0", hegiht="0"></canvas>
-      </div>  
+        <canvas id="canvas" width="0" , hegiht="0"></canvas>
+      </div>
     </figure>
     <section id="buttons">
       <table>
         <tr>
-          <td><button id="restart" onclick="try{fetch(document.location.origin+'/control?restart');}catch(e){}">Restart</button></td>
+          <td><button id="restart"
+              onclick="try{fetch(document.location.origin+'/control?restart');}catch(e){}">Restart</button></td>
           <td><button id="get-still" style="display:none">Get Still</button></td>
           <td><button id="toggle-stream" style="display:none"></button></td>
         </tr>
       </table>
-    </section>  
+    </section>
     <div id="logo">
       <label for="nav-toggle-cb" id="nav-toggle">Toggle Settings</label>
-    </div>  
+    </div>
     <div id="content">
       <div id="sidebar">
         <input type="checkbox" id="nav-toggle-cb">
@@ -372,11 +374,11 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(<!doctype html>
             <select id="kind">
               <option value="image">image</option>
             </select>
-          </div> 
+          </div>
           <div class="input-group">
             <label for="modelPath">Model Path</label>
             <input type="text" id="modelPath" value="">
-          </div> 
+          </div>
           <div class="input-group">
             <label for="btnModel"></label>
             <button type="button" id="btnModel" onclick="LoadModel();">Start Recognition
@@ -406,233 +408,233 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(<!doctype html>
             <div class="range-min">10</div>
             <input type="range" id="quality" min="10" max="63" value="10" class="default-action">
             <div class="range-max">63</div>
-          </div>  
-            
+          </div>
+
           <div class="input-group" id="brightness-group">
             <label for="brightness">Brightness</label>
             <div class="range-min">-2</div>
             <input type="range" id="brightness" min="-2" max="2" value="0" class="default-action">
             <div class="range-max">2</div>
-          </div>  
-            
+          </div>
+
           <div class="input-group" id="contrast-group">
             <label for="contrast">Contrast</label>
             <div class="range-min">-2</div>
             <input type="range" id="contrast" min="-2" max="2" value="0" class="default-action">
             <div class="range-max">2</div>
-          </div>  
-            
+          </div>
+
           <div class="input-group" id="hmirror-group">
             <label for="hmirror">HMirror</label>
             <div class="switch">
               <input type="checkbox" id="hmirror" class="default-action" checked="checked">
               <label class="slider" for="hmirror"></label>
             </div>
-          </div>      
-  
+          </div>
+
           <div class="input-group" id="vflip-group">
             <label for="vflip">VFlip</label>
             <div class="switch">
               <input type="checkbox" id="vflip" class="default-action" checked="checked">
               <label class="slider" for="vflip"></label>
             </div>
-          </div>    
-        </nav>       
-       </div> 
-     </div>  
-   </section>
-   <div id="result" style="color:red"></div>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </section>
+  <div id="result" style="color:red"></div>
 
-   <script>
-        document.addEventListener("DOMContentLoaded", function(event){
-        var baseHost=document.location.origin;
-        var streamUrl=baseHost+":81";
+  <script>
+    document.addEventListener("DOMContentLoaded", function (event) {
+      var baseHost = document.location.origin;
+      var streamUrl = baseHost + ":81";
 
-        // 宣告函數        
-        const hide = el =>{
-            el.classList.add("hidden");
-        };
-        const show = el =>{
-            el.classList.remove("hidden");
-        };
-        const disable = el =>{
-            el.classList.add("disabled");
-            el.disabled=true;
-        };
-        const enable = el =>{
-            el.classList.remove("disabled");
-            el.disabled=false;
-        };
-        const updateValue = (el, value, updateRemote) =>{
-            updateRemote = updateRemote == null ? true : updateRemote;
-            let initialValue;
-            if(el.type === "checkbox"){
-                initalValue = el.checked;
-                value = !!value;
-                el.checked = value;
-            } else {
-                intialValue = el.value;
-                el.value = value;
-            }
-            if(updateRemote && intialValue !== value){
-                updateConfig(el);
-            }
-        };
-        
-        function updateConfig(el) {
-            let value;
-            switch(el.type) {
-            case "checkbox":
-                value = el.checked ? 1 : 0;
-                break;
-            case "range":
-            case "submit":
-                value = "1";
-                break;
-            case "button":
-            default:
-                return;        
-            }
-            
-            const query = `${baseHost}/control?var=${el.id}&val=${value}`;
-            fetch(query).then((response) =>{
-                console.log(`request to ${query} finised, status: ${response.status}`)
-            });
+      // 宣告函數        
+      const hide = el => {
+        el.classList.add("hidden");
+      };
+      const show = el => {
+        el.classList.remove("hidden");
+      };
+      const disable = el => {
+        el.classList.add("disabled");
+        el.disabled = true;
+      };
+      const enable = el => {
+        el.classList.remove("disabled");
+        el.disabled = false;
+      };
+      const updateValue = (el, value, updateRemote) => {
+        updateRemote = updateRemote == null ? true : updateRemote;
+        let initialValue;
+        if (el.type === "checkbox") {
+          initalValue = el.checked;
+          value = !!value;
+          el.checked = value;
+        } else {
+          intialValue = el.value;
+          el.value = value;
         }
-        
-        document.querySelectorAll(".close").forEach(el =>{
-            el.onclick = () =>{
-            hide(el.parentNode);
-            };
-        });
-        
-        fetch(`${baseHost}/status`).then(function (response) {
-            return response.json();
-        }).then(function (state) {
-            document.querySelectorAll(".default-action").forEach(el =>{
-            updateValue(el, state[el.id], false);
-            });
-        });
-        
-        const view =document.getElementById("stream");
-        const viewContainer = document.getElementById("stream-container");
-        const stillButton =document.getElementById("get-still");
-        const streamButton=document.getElementById("toggle-stream");
-        const closeButton=document.getElementById("close-stream");
-        
-        const stopStream = ()=>{
-            view.src="";
-            streamButton.innerHTML="Start Stream";
+        if (updateRemote && intialValue !== value) {
+          updateConfig(el);
         }
+      };
 
-        const startStream = ()=>{
-            view.src=`${streamUrl}/stream`;
-            show(viewContainer);
-            streamButton.innerHTML="Stop Stream";
-        }
-
-        stillButton.onclick = ()=>{
-            stopStream();
-            try{
-                view.src=`${baseHost}/capture?_cb=${Date.now()}`;
-            } catch(e) {
-                view.src=`${baseHost}/capture?_cb=${Date.now()}`;
-            }
-            show(viewContainer);
-        };
-        
-        closeButton.onclick = ()=>{
-            stopStream();
-            hide(viewContainer);
-        };
-        
-        streamButton.onclick = ()=>{
-            const streamEnabled = streamButton.innerHTML === "Stop Stream";
-            if(streamEnabled){
-                stopStream();
-            }
-            else{
-                startStream();    
-            }
-        };
-        
-        document.querySelectorAll(".default-action").forEach( el =>{
-            el.onchange = () =>updateConfig(el);
-        });
-        });
-
-        var getStill = document.getElementById("get-still");
-        var ShowImage = document.getElementById("stream");
-        var canvas = document.getElementById("canvas");
-        var context = canvas.getContext("2d");
-        var modelPath = document.getElementById("modelPath");
-        var result = document.getElementById("result");
-        var kind = document.getElementById("kind");
-        let Model;
-
-        async function LoadModel(){
-        if(modelPath.value == ""){
-            result.innerHTML= "Please input model path.";
+      function updateConfig(el) {
+        let value;
+        switch (el.type) {
+          case "checkbox":
+            value = el.checked ? 1 : 0;
+            break;
+          case "range":
+          case "submit":
+            value = "1";
+            break;
+          case "button":
+          default:
             return;
         }
-        
-        result.innerHTML="Please wait for loading model.";
-        const URL = modelPath.value;
-        const metadataURL = URL + "metadata.json";
-        const modelURL = URL + "model.json";
-        if(kind.value == "image"){
-            Model = await tmImage.load(modelURL, metadataURL);
 
-        maxPredictions = Model.getTotalClasses();
-        result.innerHTML = "";
-        getStill.style.display = "block";
-        getStill.click();
+        const query = `${baseHost}/control?var=${el.id}&val=${value}`;
+        fetch(query).then((response) => {
+          console.log(`request to ${query} finised, status: ${response.status}`)
+        });
+      }
+
+      document.querySelectorAll(".close").forEach(el => {
+        el.onclick = () => {
+          hide(el.parentNode);
+        };
+      });
+
+      fetch(`${baseHost}/status`).then(function (response) {
+        return response.json();
+      }).then(function (state) {
+        document.querySelectorAll(".default-action").forEach(el => {
+          updateValue(el, state[el.id], false);
+        });
+      });
+
+      const view = document.getElementById("stream");
+      const viewContainer = document.getElementById("stream-container");
+      const stillButton = document.getElementById("get-still");
+      const streamButton = document.getElementById("toggle-stream");
+      const closeButton = document.getElementById("close-stream");
+
+      const stopStream = () => {
+        view.src = "";
+        streamButton.innerHTML = "Start Stream";
+      }
+
+      const startStream = () => {
+        view.src = `${streamUrl}/stream`;
+        show(viewContainer);
+        streamButton.innerHTML = "Stop Stream";
+      }
+
+      stillButton.onclick = () => {
+        stopStream();
+        try {
+          view.src = `${baseHost}/capture?_cb=${Date.now()}`;
+        } catch (e) {
+          view.src = `${baseHost}/capture?_cb=${Date.now()}`;
         }
+        show(viewContainer);
+      };
 
-        async function predict(){
-        var data = "";
-        var maxClassName="";
-        var maxProbability="";
-        canvas.setAttribute("width", ShowImage.width);
-        canvas.setAttribute("height", ShowImage.height);
-        context.drawImage(ShowImage,0,0,ShowImage.width,ShowImage.height);
-        
-        if(kind.value == "image") {
-            var prediction = await Model.predict(canvas);
-        
-        if(maxPredictions > 0){
-            for (let i=0; i<maxPredictions; i++){
-            if(i==0){
-                maxClassName=prediction[i].className;
-                maxProbability=prediction[i].probability;
+      closeButton.onclick = () => {
+        stopStream();
+        hide(viewContainer);
+      };
+
+      streamButton.onclick = () => {
+        const streamEnabled = streamButton.innerHTML === "Stop Stream";
+        if (streamEnabled) {
+          stopStream();
+        }
+        else {
+          startStream();
+        }
+      };
+
+      document.querySelectorAll(".default-action").forEach(el => {
+        el.onchange = () => updateConfig(el);
+      });
+    });
+
+    var getStill = document.getElementById("get-still");
+    var ShowImage = document.getElementById("stream");
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    var modelPath = document.getElementById("modelPath");
+    var result = document.getElementById("result");
+    var kind = document.getElementById("kind");
+    let Model;
+
+    async function LoadModel() {
+      if (modelPath.value == "") {
+        result.innerHTML = "Please input model path.";
+        return;
+      }
+
+      result.innerHTML = "Please wait for loading model.";
+      const URL = modelPath.value;
+      const metadataURL = URL + "metadata.json";
+      const modelURL = URL + "model.json";
+      Model = await tmImage.load(modelURL, metadataURL);
+
+      maxPredictions = Model.getTotalClasses();
+      result.innerHTML = "";
+      getStill.style.display = "block";
+      getStill.click();
+    }
+
+    async function predict() {
+      var data = "";
+      var maxClassName = "";
+      var maxProbability = "";
+      canvas.setAttribute("width", ShowImage.width);
+      canvas.setAttribute("height", ShowImage.height);
+      context.drawImage(ShowImage, 0, 0, ShowImage.width, ShowImage.height);
+
+      if (kind.value == "image") {
+        var prediction = await Model.predict(canvas);
+
+        if (maxPredictions > 0) {
+          for (let i = 0; i < maxPredictions; i++) {
+            if (i == 0) {
+              maxClassName = prediction[i].className;
+              maxProbability = prediction[i].probability;
             } else {
-                if(prediction[i].probability > maxProbability){
-                maxClassName=prediction[i].className;
-                maxProbability=prediction[i].probability;
-                }
+              if (prediction[i].probability > maxProbability) {
+                maxClassName = prediction[i].className;
+                maxProbability = prediction[i].probability;
+              }
             }
-            data += prediction[i].className + "," + prediction[i].probability.toFixed(2)+"<br>";   
+            data += prediction[i].className + "," + prediction[i].probability.toFixed(2) + "<br>";
             result.innerHTML = data;
-            result.innerHTML += "<br>Result:" + maxClassName + "," + maxProbability;      
-            } 
+            result.innerHTML += "<br>Result:" + maxClassName + "," + maxProbability;
+          }
         } else result.innerHTML = "Unrecognized";
         getStill.click();
-        }
+      }
+    }
 
-        ShowImage.onload = function (event){
-        if (Model){
-            try {
-            document.createEvent("TouchEvent");
-            setTimeout(function() {
-                predict();
-            },250);
-            } catch(e){
-                predict();
-            }
+    ShowImage.onload = function (event) {
+      if (Model) {
+        try {
+          document.createEvent("TouchEvent");
+          setTimeout(function () {
+            predict();
+          }, 250);
+        } catch (e) {
+          predict();
         }
-        }
-   </script>
-  </body>
+      }
+    }
+  </script>
+</body>
 </html>)rawliteral";
 
 static esp_err_t index_handler(httpd_req *req)

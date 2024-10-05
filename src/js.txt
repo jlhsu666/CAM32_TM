@@ -1,0 +1,189 @@
+  <script>
+    document.addEventListener("DOMContentLoaded", function (event) {
+      var baseHost = document.location.origin;
+      var streamUrl = baseHost + ":81";
+
+      // 宣告函數        
+      const hide = el => {
+        el.classList.add("hidden");
+      };
+      const show = el => {
+        el.classList.remove("hidden");
+      };
+      const disable = el => {
+        el.classList.add("disabled");
+        el.disabled = true;
+      };
+      const enable = el => {
+        el.classList.remove("disabled");
+        el.disabled = false;
+      };
+      const updateValue = (el, value, updateRemote) => {
+        updateRemote = updateRemote == null ? true : updateRemote;
+        let initialValue;
+        if (el.type === "checkbox") {
+          initalValue = el.checked;
+          value = !!value;
+          el.checked = value;
+        } else {
+          intialValue = el.value;
+          el.value = value;
+        }
+        if (updateRemote && intialValue !== value) {
+          updateConfig(el);
+        }
+      };
+
+      function updateConfig(el) {
+        let value;
+        switch (el.type) {
+          case "checkbox":
+            value = el.checked ? 1 : 0;
+            break;
+          case "range":
+          case "submit":
+            value = "1";
+            break;
+          case "button":
+          default:
+            return;
+        }
+
+        const query = `${baseHost}/control?var=${el.id}&val=${value}`;
+        fetch(query).then((response) => {
+          console.log(`request to ${query} finised, status: ${response.status}`)
+        });
+      }
+
+      document.querySelectorAll(".close").forEach(el => {
+        el.onclick = () => {
+          hide(el.parentNode);
+        };
+      });
+
+      fetch(`${baseHost}/status`).then(function (response) {
+        return response.json();
+      }).then(function (state) {
+        document.querySelectorAll(".default-action").forEach(el => {
+          updateValue(el, state[el.id], false);
+        });
+      });
+
+      const view = document.getElementById("stream");
+      const viewContainer = document.getElementById("stream-container");
+      const stillButton = document.getElementById("get-still");
+      const streamButton = document.getElementById("toggle-stream");
+      const closeButton = document.getElementById("close-stream");
+
+      const stopStream = () => {
+        view.src = "";
+        streamButton.innerHTML = "Start Stream";
+      }
+
+      const startStream = () => {
+        view.src = `${streamUrl}/stream`;
+        show(viewContainer);
+        streamButton.innerHTML = "Stop Stream";
+      }
+
+      stillButton.onclick = () => {
+        stopStream();
+        try {
+          view.src = `${baseHost}/capture?_cb=${Date.now()}`;
+        } catch (e) {
+          view.src = `${baseHost}/capture?_cb=${Date.now()}`;
+        }
+        show(viewContainer);
+      };
+
+      closeButton.onclick = () => {
+        stopStream();
+        hide(viewContainer);
+      };
+
+      streamButton.onclick = () => {
+        const streamEnabled = streamButton.innerHTML === "Stop Stream";
+        if (streamEnabled) {
+          stopStream();
+        }
+        else {
+          startStream();
+        }
+      };
+
+      document.querySelectorAll(".default-action").forEach(el => {
+        el.onchange = () => updateConfig(el);
+      });
+    });
+
+    var getStill = document.getElementById("get-still");
+    var ShowImage = document.getElementById("stream");
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    var modelPath = document.getElementById("modelPath");
+    var result = document.getElementById("result");
+    var kind = document.getElementById("kind");
+    let Model;
+
+    async function LoadModel() {
+      if (modelPath.value == "") {
+        result.innerHTML = "Please input model path.";
+        return;
+      }
+
+      result.innerHTML = "Please wait for loading model.";
+      const URL = modelPath.value;
+      const metadataURL = URL + "metadata.json";
+      const modelURL = URL + "model.json";
+      Model = await tmImage.load(modelURL, metadataURL);
+
+      maxPredictions = Model.getTotalClasses();
+      result.innerHTML = "";
+      getStill.style.display = "block";
+      getStill.click();
+    }
+
+    async function predict() {
+      var data = "";
+      var maxClassName = "";
+      var maxProbability = "";
+      canvas.setAttribute("width", ShowImage.width);
+      canvas.setAttribute("height", ShowImage.height);
+      context.drawImage(ShowImage, 0, 0, ShowImage.width, ShowImage.height);
+
+      if (kind.value == "image") {
+        var prediction = await Model.predict(canvas);
+
+        if (maxPredictions > 0) {
+          for (let i = 0; i < maxPredictions; i++) {
+            if (i == 0) {
+              maxClassName = prediction[i].className;
+              maxProbability = prediction[i].probability;
+            } else {
+              if (prediction[i].probability > maxProbability) {
+                maxClassName = prediction[i].className;
+                maxProbability = prediction[i].probability;
+              }
+            }
+            data += prediction[i].className + "," + prediction[i].probability.toFixed(2) + "<br>";
+            result.innerHTML = data;
+            result.innerHTML += "<br>Result:" + maxClassName + "," + maxProbability;
+          }
+        } else result.innerHTML = "Unrecognized";
+        getStill.click();
+      }
+    }
+
+    ShowImage.onload = function (event) {
+      if (Model) {
+        try {
+          document.createEvent("TouchEvent");
+          setTimeout(function () {
+            predict();
+          }, 250);
+        } catch (e) {
+          predict();
+        }
+      }
+    }
+  </script>
